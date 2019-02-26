@@ -1,2 +1,4 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.ok2c.hc.android"/>
+          package="com.ok2c.hc.android">
+    <uses-permission android:name="android.permission.INTERNET"/>
+</manifest>
