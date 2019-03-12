@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
+apply plugin: com.github.ok2c.gradle.android.PublishAdaptorPlugin
 
 android {
     compileSdkVersion 28
@@ -32,11 +34,46 @@ android {
 
 }
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation libraries.httpclient
-    implementation 'com.android.support:appcompat-v7:28.0.0'
+    api libraries.httpclient
     testImplementation libraries.junit
     testImplementation libraries.hamcrest
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}
+
+afterEvaluate {
+
+    publishing {
+        publications {
+            mavenArtifacts(MavenPublication) {
+
+                from components.releaseAndroidLibrary
+
+                pom {
+                    name = 'Apache HttpClient extensions for Android'
+                    description = 'Apache HttpClient extensions for Android'
+                    url = 'https://github.com/ok2c/httpclient-android-ext'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'ok2c'
+                            name = 'Oleg Kalnichevski'
+                            email = 'olegk@apache.org'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:git@github.com:ok2c/httpclient-android-ext.git'
+                        developerConnection = 'scm:git:ssh://github.com:ok2c/httpclient-android-ext.git'
+                        url = 'https://github.com/ok2c/httpclient-android-ext'
+                    }
+                }
+            }
+        }
+    }
+
 }

@@ -1,1 +1,2 @@
 include ':httpclient-android'
+enableFeaturePreview('STABLE_PUBLISHING')
