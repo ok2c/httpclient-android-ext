@@ -41,6 +41,32 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
 
+task androidJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    android.libraryVariants.all { variant ->
+        if (variant.name == 'release') {
+            owner.classpath += variant.javaCompileProvider.get().classpath
+        }
+    }
+    exclude '**/R.html', '**/R.*.html', '**/index.html'
+    options.addBooleanOption('Xdoclint:-missing', true)
+    options.links 'http://docs.oracle.com/javase/7/docs/api/',
+            'http://developer.android.com/reference/',
+            'http://hc.apache.org/httpcomponents-client-4.5.x/httpclient/apidocs/',
+            'http://hc.apache.org/httpcomponents-core-4.4.x/httpcore/apidocs/'
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
 afterEvaluate {
 
     publishing {
@@ -48,6 +74,8 @@ afterEvaluate {
             mavenArtifacts(MavenPublication) {
 
                 from components.releaseAndroidLibrary
+                artifact androidJavadocsJar
+                artifact androidSourcesJar
 
                 pom {
                     name = 'Apache HttpClient extensions for Android'
