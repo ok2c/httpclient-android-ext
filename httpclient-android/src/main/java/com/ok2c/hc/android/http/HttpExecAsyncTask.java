@@ -39,7 +39,7 @@ import java.util.List;
  * and processing of {@link CloseableHttpResponse}s. This class can execute a sequence
  * of requests and process corresponding response data streams using a {@link ResponseHandler}
  * provided by the caller asynchronously from the UI activity while pushing {@link ExecUpdate}
- * with status updates messages from the execution thread to the UI activity thread.
+ * messages with status updates from the execution thread to the UI activity thread.
  *
  * @param <T> message exchange result type
  */
