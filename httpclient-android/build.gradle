@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
+apply plugin: 'signing'
 apply plugin: com.github.ok2c.gradle.android.PublishAdaptorPlugin
 
 android {
@@ -102,6 +103,64 @@ afterEvaluate {
                 }
             }
         }
+        repositories {
+            maven {
+                def releasesRepoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+                def snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
+                url = releaseVersion ? releasesRepoUrl : snapshotsRepoUrl
+
+                if (project.ext.has('ossrh.user')) {
+                    credentials {
+                        username = project.ext.'ossrh.user'
+                        password = project.ext.'ossrh.password'
+                    }
+                }
+            }
+        }
     }
 
+    if (releaseVersion) {
+        signing {
+            sign publishing.publications.mavenArtifacts
+        }
+    }
+
+}
+
+def askSigningKeyPassphrase() {
+    def keyId = project.ext.has('signing.keyId') ? project.ext.'signing.keyId' : null
+    def password = project.ext.has('signing.password') ? project.ext.'signing.password' : null
+    if (keyId && !password) {
+        def console = System.console()
+        if (console) {
+            console.println "\n> Please provide password for PGP key ${keyId}: "
+            char[] raw = console.readPassword()
+            project.ext.'signing.password' = new String(raw)
+        } else {
+            logger.warn 'Console is not available'
+        }
+    }
+}
+
+def askRepoPassword(MavenArtifactRepository repository) {
+    def credentials = repository.credentials
+    if (credentials.username && !credentials.password) {
+        def console = System.console()
+        if (console) {
+            console.println "\n> Please provide password for user ${credentials.username}: "
+            char[] raw = console.readPassword()
+            credentials.password = new String(raw)
+        } else {
+            logger.warn 'Console is not available'
+        }
+    }
+}
+
+gradle.taskGraph.whenReady { TaskExecutionGraph taskGraph ->
+    taskGraph.allTasks.findAll { task -> task instanceof Sign }.each { task ->
+        task.doFirst { askSigningKeyPassphrase() }
+    }
+    taskGraph.allTasks.findAll { task -> task instanceof PublishToMavenRepository }.each { task ->
+        task.doFirst { askRepoPassword(task.repository) }
+    }
 }
