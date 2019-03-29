@@ -15,8 +15,8 @@
  */
 package com.ok2c.hc.android.http;
 
-import org.apache.http.RequestLine;
-import org.apache.http.StatusLine;
+import org.apache.hc.core5.http.message.RequestLine;
+import org.apache.hc.core5.http.message.StatusLine;
 
 import java.util.Objects;
 

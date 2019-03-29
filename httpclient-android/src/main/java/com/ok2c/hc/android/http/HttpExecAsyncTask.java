@@ -17,17 +17,15 @@ package com.ok2c.hc.android.http;
 
 import android.os.AsyncTask;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.RequestLine;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.Args;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.message.RequestLine;
+import org.apache.hc.core5.http.message.StatusLine;
+import org.apache.hc.core5.util.Args;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,15 +33,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Extension of {@link AsyncTask} that simplifies execution of {@link HttpUriRequest}s.
- * and processing of {@link CloseableHttpResponse}s. This class can execute a sequence
+ * Extension of {@link AsyncTask} that simplifies execution of {@link ClassicHttpRequest}s.
+ * and processing of {@link ClassicHttpResponse}s. This class can execute a sequence
  * of requests and process corresponding response data streams using a {@link ResponseHandler}
  * provided by the caller asynchronously from the UI activity while pushing {@link ExecUpdate}
  * messages with status updates from the execution thread to the UI activity thread.
  *
  * @param <T> message exchange result type
  */
-public class HttpExecAsyncTask<T> extends AsyncTask<HttpUriRequest, ExecUpdate, List<T>> {
+public class HttpExecAsyncTask<T> extends AsyncTask<ClassicHttpRequest, ExecUpdate, List<T>> {
 
     /**
      * Abstract response processing function.
@@ -63,8 +61,8 @@ public class HttpExecAsyncTask<T> extends AsyncTask<HttpUriRequest, ExecUpdate, 
          *                    or {@code null} if the response does not enclose an entity
          * @return the message exchange result
          */
-        T handle(HttpRequest request,
-                 HttpResponse response,
+        T handle(ClassicHttpRequest request,
+                 ClassicHttpResponse response,
                  ContentType contentType,
                  InputStream inputStream) throws IOException;
 
@@ -80,20 +78,20 @@ public class HttpExecAsyncTask<T> extends AsyncTask<HttpUriRequest, ExecUpdate, 
     }
 
     @Override
-    protected List<T> doInBackground(final HttpUriRequest... requests) {
+    protected List<T> doInBackground(final ClassicHttpRequest... requests) {
         HttpClientContext context = HttpClientContext.create();
         List<T> results = new ArrayList<>();
-        for (HttpUriRequest request : requests) {
-            final RequestLine requestLine = request.getRequestLine();
+        for (ClassicHttpRequest request : requests) {
+            final RequestLine requestLine = new RequestLine(request);
             publishProgress(ExecUpdate.request(requestLine));
-            try (CloseableHttpResponse response = httpClient.execute(request, context)) {
+            try (ClassicHttpResponse response = httpClient.execute(request, context)) {
                 final HttpEntity entity = response.getEntity();
-                final StatusLine statusLine = response.getStatusLine();
+                final StatusLine statusLine = new StatusLine(response);
                 if (entity != null) {
                     final long total = entity.getContentLength();
                     try (final InputStream inputStream = entity.getContent()) {
                         publishProgress(ExecUpdate.response(requestLine, statusLine, 0, total));
-                        final ContentType contentType = ContentType.get(entity);
+                        final ContentType contentType = ContentType.parseLenient(entity.getContentType());
                         results.add(responseHandler.handle(request, response, contentType, new InputStream() {
 
                             long current = 0;
