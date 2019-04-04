@@ -259,10 +259,10 @@ configuration into the `LogManager` manually at application start-up.
 1. Activate `Logcat` categories 
 
     ```
-    adb logcat MainClient:D
-    adb logcat MainClientHeader:D
-    adb logcat MainClientWire:D
+    adb shell setprop log.tag.HttpClient VERBOSE
+    adb shell setprop log.tag.HttpClientHeader VERBOSE
+    adb shell setprop log.tag.HttpClientWire VERBOSE
     
     ```
-Skip `MainClientWire` if wire logging is not required.    
+Skip `HttpClientWire` if wire logging is not required.    
     
