@@ -23,7 +23,7 @@ libraries.hamcrest = "org.hamcrest:hamcrest-library:${versions.hamcrest}"
 
 allprojects {
     group 'com.github.ok2c.hc5.android'
-    version '0.1.0-SNAPSHOT'
+    version '0.1.1-SNAPSHOT'
 
     ext.releaseVersion = !version.endsWith("-SNAPSHOT")
 
