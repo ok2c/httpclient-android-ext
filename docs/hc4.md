@@ -15,7 +15,7 @@ dependencies {
 
 ## Configuration and application
 
-HttpClient 4.5 is _almost_ compatible with Android API 26 or later. The trouble-maker is 
+HttpClient 4.5 is _almost_ compatible with Android API 28 or later. The trouble-maker is 
 the `org.apache.http.conn.ssl.DefaultHostnameVerifier` class that depends on `javax.naming` APIs 
 unsupported by Android.
 
