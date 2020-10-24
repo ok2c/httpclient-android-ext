@@ -5,15 +5,15 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:4.0.0")
+        classpath("com.android.tools.build:gradle:4.0.2")
         classpath(kotlin("gradle-plugin", version = "1.3.72"))
     }
 }
 
 val versions = mapOf(
-        "httpclient" to "5.0.1",
-        "junit" to "4.12",
-        "hamcrest" to "1.3"
+        "httpclient" to "5.0.3",
+        "junit" to "4.13.1",
+        "hamcrest" to "2.2"
 )
 
 allprojects {
