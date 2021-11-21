@@ -1,12 +1,12 @@
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:4.0.2")
-        classpath(kotlin("gradle-plugin", version = "1.3.72"))
+        classpath("com.android.tools.build:gradle:7.0.3")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.0")
     }
 }
 
@@ -23,7 +23,7 @@ allprojects {
     repositories {
         mavenLocal()
         google()
-        jcenter()
+        mavenCentral()
     }
 
     extra["releaseVersion"] = !version.toString().endsWith("-SNAPSHOT")
