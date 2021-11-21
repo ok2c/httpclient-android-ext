@@ -58,8 +58,9 @@ tasks.register<Javadoc>("androidJavadocs") {
     stdOptions.links(
             "http://docs.oracle.com/javase/7/docs/api/",
             "http://developer.android.com/reference/",
-            "http://hc.apache.org/httpcomponents-client-5.0.x/httpclient5/apidocs/",
-            "http://hc.apache.org/httpcomponents-core-5.0.x/httpcore5/apidocs/")
+            "https://hc.apache.org/httpcomponents-core-5.1.x/current/httpcore5/apidocs/",
+            "https://hc.apache.org/httpcomponents-core-5.1.x/current/httpcore5-h2/apidocs/",
+            "https://hc.apache.org/httpcomponents-client-5.1.x/current/httpclient5/apidocs/")
 }
 
 tasks.register<Jar>("androidJavadocsJar") {
