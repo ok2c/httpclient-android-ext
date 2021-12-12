@@ -25,131 +25,37 @@ Activities that have a dedicated `CloseableHttpClient` instance should close it 
 in order to deallocate system resources held by persistent HTTP connections kept alive in 
 the connection pool.
 
-```java
-public class HttpClientActivity extends Activity {
+`HttpClientActivity` provided by the library can be used as a base class for all activities that
+involve HTTP communication using Apache HttpClient.
 
-    private static final String LOG_TAG = "HttpClientActivity";
+```kotlin
+abstract class HttpClientActivity(builder: PoolingHttpClientConnectionManagerBuilder): Activity() {
 
-    private final PoolingHttpClientConnectionManager connectionManager;
-    private final CloseableHttpClient httpClient;
+    protected var connectionManager: PoolingHttpClientConnectionManager = builder.build()
 
-    public HttpClientActivity() {
-        this.connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
-                .setConnectionTimeToLive(TimeValue.ofMinutes(1))
-                .setDefaultSocketConfig(SocketConfig.custom()
-                        .setSoTimeout(Timeout.ofSeconds(5))
-                        .build())
-                .build();
-        this.httpClient = HttpClients.custom()
-                .setConnectionManager(connectionManager)
-                .setDefaultRequestConfig(RequestConfig.custom()
-                        .setConnectTimeout(Timeout.ofSeconds(5))
-                        .setResponseTimeout(Timeout.ofSeconds(5))
-                        .setCookieSpec(CookieSpecs.STANDARD_STRICT.ident)
-                        .build())
-                .build();
+    override fun onPause() {
+        connectionManager.closeIdle(TimeValue.ZERO_MILLISECONDS)
+        super.onPause()
     }
 
-    @Override
-    protected void onPause() {
-        connectionManager.closeIdle(TimeValue.ZERO_MILLISECONDS);
-        super.onPause();
+    override fun onResume() {
+        connectionManager.closeExpired()
+        super.onResume()
     }
 
-    @Override
-    protected void onResume() {
-        connectionManager.closeExpired();
-        super.onResume();
+    override fun onStop() {
+        connectionManager.closeIdle(TimeValue.ZERO_MILLISECONDS)
+        super.onStop()
     }
 
-    @Override
-    protected void onStop() {
-        connectionManager.closeIdle(TimeValue.ZERO_MILLISECONDS);
-        super.onStop();
-    }
-
-    @Override
-    protected void onDestroy() {
-        try {
-            this.httpClient.close();
-        } catch (IOException e) {
-            Log.e(LOG_TAG, e.getMessage(), e);
-        }
-        super.onDestroy();
+    override fun onDestroy() {
+        connectionManager.close(CloseMode.GRACEFUL)
+        super.onDestroy()
     }
 
 }
 ```
 
-## Asynchronous HTTP message exchange support
-
-The `HttpExecAsyncTask` class is an extension of Android `AsyncTask` that simplifies execution 
-of HTTP requests and processing of HTTP responses. This class can execute a sequence of requests 
-and process corresponding response data streams using a `HttpExecAsyncTask.ResponseHandler` handler
-provided by the caller asynchronously from the UI activity while pushing `ExecUpdate` messages
-with status updates from the execution thread to the UI activity thread. The UI components
-can be updated to reflect the progress of HTTP message exchange based on attributes of 
-`ExecUpdate` message. 
-
-```java
-public class InternalHttpRequestAsyncTask extends HttpExecAsyncTask<ClassicHttpResponse> {
-
-    private final WeakReference<Activity> activityRef;
-
-    InternalHttpRequestAsyncTask(
-            final CloseableHttpClient httpClient,
-            final Activity activity,
-            final HttpExecAsyncTask.ResponseHandler<ClassicHttpResponse> handler) {
-        super(httpClient, handler);
-        this.activityRef = new WeakReference<>(activity);
-    }
-
-    private Activity getActivity() {
-        Activity activity = activityRef.get();
-        if (activity != null && !activity.isFinishing()) {
-            return activity;
-        }
-        return null;
-    }
-
-    @Override
-    protected void onPreExecute() {
-        Activity activity = getActivity();
-        if (activity == null) {
-            return;
-        }
-        ...
-    }
-
-    @Override
-    protected void onProgressUpdate(final ExecUpdate... values) {
-        Activity activity = getActivity();
-        if (activity == null) {
-            return;
-        }
-        ...
-    }
-
-    @Override
-    protected void onCancelled(final List<ClassicHttpResponse> httpResponses) {
-        Activity activity = getActivity();
-        if (activity == null) {
-            return;
-        }
-        ...
-    }
-
-    @Override
-    protected void onPostExecute(final List<ClassicHttpResponse> responses) {
-        Activity activity = getActivity();
-        if (activity == null) {
-            return;
-        }
-        ...
-    }
-
-}
-```
 ## Logging
 
 Apache HttpClient 5.0 uses SLF4J APIs to log messages. Any SLF4J backend compatible with Android
@@ -163,34 +69,31 @@ Wire log events are redirected to `HttpClientWire` and message header events to 
 1. Add the following class to application code. *IMPORTANT* Please note this class must
    be located in the `org.slf4j.impl` package.
 
-    ```java
-    package org.slf4j.impl;
-    
-    import org.slf4j.ILoggerFactory;
-    import org.slf4j.spi.LoggerFactoryBinder;
-    
-    import com.ok2c.hc.android.logging.AndroidLoggerFactory;
-    
-    public final class StaticLoggerBinder implements LoggerFactoryBinder {
-    
-        private static final StaticLoggerBinder INSTANCE = new StaticLoggerBinder();
-    
-        public static StaticLoggerBinder getSingleton() {
-            return INSTANCE;
-        }
-    
-        @Override
-        public ILoggerFactory getLoggerFactory() {
-            return AndroidLoggerFactory.INSTANCE;
-        }
-    
-        @Override
-        public String getLoggerFactoryClassStr() {
-            return AndroidLoggerFactory.class.getName();
-        }
-    
+ ```kotlin
+package org.slf4j.impl
+
+import com.ok2c.hc.android.logging.AndroidLoggerFactory
+import org.slf4j.ILoggerFactory
+import org.slf4j.spi.LoggerFactoryBinder
+
+class StaticLoggerBinder: LoggerFactoryBinder {
+
+    private val INSTANCE = StaticLoggerBinder()
+
+    fun getSingleton(): StaticLoggerBinder? {
+        return INSTANCE
     }
-    ```
+
+    override fun getLoggerFactory(): ILoggerFactory? {
+        return AndroidLoggerFactory.INSTANCE
+    }
+
+    override fun getLoggerFactoryClassStr(): String? {
+        return AndroidLoggerFactory::class.java.name
+    }
+
+}
+ ```
 1. Activate `Logcat` categories 
 
     ```
