@@ -1,0 +1,5 @@
+HttpClient Android Extensions
+Copyright 2019-2022 OK2 consulting GmbH
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
