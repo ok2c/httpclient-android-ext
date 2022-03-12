@@ -19,7 +19,7 @@ val versions = mapOf(
 
 allprojects {
     group = "com.github.ok2c.hc5.android"
-    version = "0.1.2-SNAPSHOT"
+    version = "0.2.1-SNAPSHOT"
 
     repositories {
         mavenLocal()
