@@ -78,11 +78,14 @@ import org.slf4j.spi.LoggerFactoryBinder
 
 class StaticLoggerBinder: LoggerFactoryBinder {
 
-    private val INSTANCE = StaticLoggerBinder()
+   companion object {
+      private val INSTANCE = StaticLoggerBinder()
 
-    fun getSingleton(): StaticLoggerBinder? {
-        return INSTANCE
-    }
+      @JvmStatic
+      fun getSingleton(): StaticLoggerBinder? {
+         return INSTANCE
+      }
+   }
 
     override fun getLoggerFactory(): ILoggerFactory? {
         return AndroidLoggerFactory.INSTANCE
