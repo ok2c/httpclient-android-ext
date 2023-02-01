@@ -1,4 +1,4 @@
-package om.ok2c.hc.android
+package com.ok2c.hc.android
 
 import android.app.Activity
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager
