@@ -8,7 +8,7 @@ Apache HttpClient.
 
 ```
 dependencies {
-    api 'com.github.ok2c.hc5.android:httpclient-android:0.2.0'
+    api 'com.github.ok2c.hc5.android:httpclient-android:0.3.0'
 }
 
 ```
