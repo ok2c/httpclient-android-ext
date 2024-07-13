@@ -1,3 +1,18 @@
+Release 0.3.0
+-------------------
+
+This is a minor feature release that upgraded HttpClient to the latest 5.3 version.
+
+Changelog
+---------
+
+* Upgraded HttpClient to version 5.3.1
+
+* Upgraded HttpCore to version 5.2.5
+
+* Upgraded Gradle to version 7.6
+
+
 Release 0.2.0
 -------------------
 
