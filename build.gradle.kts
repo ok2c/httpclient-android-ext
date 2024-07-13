@@ -6,14 +6,13 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:7.0.4")
+        classpath("com.android.tools.build:gradle:7.4.0")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.0")
     }
 }
 
 val versions = mapOf(
         "httpclient" to "5.1.3",
-        "junit" to "4.13.1",
         "hamcrest" to "2.2"
 )
 

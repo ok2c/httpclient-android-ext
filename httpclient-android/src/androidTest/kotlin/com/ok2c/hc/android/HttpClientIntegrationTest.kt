@@ -34,7 +34,7 @@ import org.junit.runner.RunWith
 class HttpClientIntegrationTest {
 
     // HttpBin.org running in a docker container
-    val httpbin = HttpHost("172.18.0.1", 8082)
+    val httpbin = HttpHost("172.19.0.2", 80)
 
     val client: CloseableHttpClient = HttpClientBuilder.create()
         .build();

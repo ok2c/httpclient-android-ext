@@ -4,14 +4,13 @@ plugins {
 }
 
 android {
-    compileSdk = 30
+    namespace = "com.ok2c.hc.android"
+
+    compileSdk = 33
 
     defaultConfig {
         minSdk = 19
-        targetSdk = 30
-
         testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"
-
     }
 
     buildTypes {
@@ -27,14 +26,14 @@ android {
     }
 
     packagingOptions {
-        exclude("META-INF/DEPENDENCIES")
-        exclude("META-INF/LICENSE")
-        exclude("META-INF/LICENSE.txt")
-        exclude("META-INF/license.txt")
-        exclude("META-INF/NOTICE")
-        exclude("META-INF/NOTICE.txt")
-        exclude("META-INF/notice.txt")
-        exclude("META-INF/ASL2.0")
+        resources.excludes.add("META-INF/DEPENDENCIES")
+        resources.excludes.add("META-INF/LICENSE")
+        resources.excludes.add("META-INF/LICENSE.txt")
+        resources.excludes.add("META-INF/license.txt")
+        resources.excludes.add("META-INF/NOTICE")
+        resources.excludes.add("META-INF/NOTICE.txt")
+        resources.excludes.add("META-INF/notice.txt")
+        resources.excludes.add("META-INF/ASL2.0")
     }
 }
 
@@ -42,7 +41,6 @@ dependencies {
     val versions: Map<String, String> by project.extra
 
     api("org.apache.httpcomponents.client5:httpclient5:${versions["httpclient"]}")
-    testImplementation("junit:junit:${versions["junit"]}")
     testImplementation("org.hamcrest:hamcrest-library:${versions["hamcrest"]}")
     androidTestImplementation("com.android.support.test:runner:1.0.2")
     androidTestImplementation("com.android.support.test.espresso:espresso-core:3.0.2")
