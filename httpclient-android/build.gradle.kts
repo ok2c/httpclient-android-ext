@@ -41,6 +41,8 @@ dependencies {
     val versions: Map<String, String> by project.extra
 
     api("org.apache.httpcomponents.client5:httpclient5:${versions["httpclient"]}")
+    api("org.apache.httpcomponents.core5:httpcore5:${versions["httpcore"]}")
+    api("org.apache.httpcomponents.core5:httpcore5-h2:${versions["httpcore"]}")
     testImplementation("org.hamcrest:hamcrest-library:${versions["hamcrest"]}")
     androidTestImplementation("com.android.support.test:runner:1.0.2")
     androidTestImplementation("com.android.support.test.espresso:espresso-core:3.0.2")
