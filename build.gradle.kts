@@ -12,7 +12,7 @@ buildscript {
 }
 
 val versions = mapOf(
-        "httpclient" to "5.1.3",
+        "httpclient" to "5.1.4",
         "hamcrest" to "2.2"
 )
 
