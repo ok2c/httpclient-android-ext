@@ -27,9 +27,10 @@ import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider
 import org.apache.hc.client5.http.protocol.HttpClientContext
 import org.apache.hc.core5.http.HttpHost
+import org.apache.hc.core5.http.HttpStatus
 import org.apache.hc.core5.http.nio.support.AsyncRequestBuilder
+import org.assertj.core.api.Assertions
 import org.junit.After
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -66,7 +67,7 @@ class HttpAsyncClientIntegrationTest {
         }
         for (responseFuture in responseQueue) {
             val response = responseFuture.get()
-            Assert.assertEquals(200, response.code)
+            Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK);
         }
     }
 
@@ -84,7 +85,7 @@ class HttpAsyncClientIntegrationTest {
         }
         for (responseFuture in responseQueue) {
             val response = responseFuture.get()
-            Assert.assertEquals(200, response.code)
+            Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK)
         }
     }
 
@@ -108,7 +109,7 @@ class HttpAsyncClientIntegrationTest {
         }
         for (responseFuture in responseQueue) {
             val response = responseFuture.get()
-            Assert.assertEquals(200, response.code)
+            Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK)
         }
     }
 
@@ -133,7 +134,7 @@ class HttpAsyncClientIntegrationTest {
         }
         for (responseFuture in responseQueue) {
             val response = responseFuture.get()
-            Assert.assertEquals(200, response.code)
+            Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK)
         }
     }
 

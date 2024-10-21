@@ -23,10 +23,11 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.client5.http.protocol.HttpClientContext
 import org.apache.hc.core5.http.HttpHost
+import org.apache.hc.core5.http.HttpStatus
 import org.apache.hc.core5.http.io.entity.EntityUtils
 import org.apache.hc.core5.http.io.support.ClassicRequestBuilder
+import org.assertj.core.api.Assertions
 import org.junit.After
-import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -50,10 +51,10 @@ class HttpClientIntegrationTest {
             val request = ClassicRequestBuilder.get("/get")
                 .setHttpHost(httpbin)
                 .build();
-            Assert.assertEquals(200, client.execute(request) { response ->
+            Assertions.assertThat(client.execute(request) { response ->
                 EntityUtils.consume(response.entity);
                 response.code
-            })
+            }).isEqualTo(HttpStatus.SC_OK)
         }
     }
 
@@ -64,10 +65,10 @@ class HttpClientIntegrationTest {
                 .setHttpHost(httpbin)
                 .setEntity("stuff")
                 .build();
-            Assert.assertEquals(200, client.execute(request) { response ->
+            Assertions.assertThat(client.execute(request) { response ->
                 EntityUtils.consume(response.entity);
                 response.code
-            })
+            }).isEqualTo(HttpStatus.SC_OK)
         }
     }
 
@@ -83,10 +84,10 @@ class HttpClientIntegrationTest {
             val request = ClassicRequestBuilder.get("/basic-auth/test-user/passwd")
                 .setHttpHost(httpbin)
                 .build();
-            Assert.assertEquals(200, client.execute(request, context) { response ->
+            Assertions.assertThat(client.execute(request, context) { response ->
                 EntityUtils.consume(response.entity);
                 response.code
-            })
+            }).isEqualTo(HttpStatus.SC_OK)
         }
     }
 
@@ -102,10 +103,10 @@ class HttpClientIntegrationTest {
             val request = ClassicRequestBuilder.get("/digest-auth/auth/test-user/passwd")
                 .setHttpHost(httpbin)
                 .build();
-            Assert.assertEquals(200, client.execute(request, context) { response ->
+            Assertions.assertThat(client.execute(request, context) { response ->
                 EntityUtils.consume(response.entity);
                 response.code
-            })
+            }).isEqualTo(HttpStatus.SC_OK)
         }
     }
 
