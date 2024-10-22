@@ -22,14 +22,19 @@ import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.client5.http.protocol.HttpClientContext
+import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.HttpHost
 import org.apache.hc.core5.http.HttpStatus
+import org.apache.hc.core5.http.Message
+import org.apache.hc.core5.http.Method
 import org.apache.hc.core5.http.io.entity.EntityUtils
+import org.apache.hc.core5.http.io.entity.StringEntity
 import org.apache.hc.core5.http.io.support.ClassicRequestBuilder
 import org.assertj.core.api.Assertions
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
+
 
 /**
  * Make sure the integration test services are running
@@ -50,34 +55,91 @@ class HttpClientIntegrationTest {
     }
 
     @Test
-    fun testHttpGet() {
+    fun test_get() {
         for (i in 1..5) {
-            val request = ClassicRequestBuilder.get("/get")
+            val request = ClassicRequestBuilder.get()
                 .setHttpHost(httpbin)
+                .setPath("/get")
                 .build();
-            Assertions.assertThat(client.execute(request) { response ->
-                EntityUtils.consume(response.entity);
-                response.code
-            }).isEqualTo(HttpStatus.SC_OK)
+            val message = client.execute(request) { response ->
+                Message(response, EntityUtils.toString(response.entity))
+            }
+            Assertions.assertThat(message.head.code).isEqualTo(HttpStatus.SC_OK)
         }
     }
 
     @Test
-    fun testHttpPost() {
+    fun test_post() {
         for (i in 1..5) {
-            val request = ClassicRequestBuilder.post("/post")
+            val request = ClassicRequestBuilder.post()
                 .setHttpHost(httpbin)
+                .setPath("/post")
                 .setEntity("stuff")
                 .build();
-            Assertions.assertThat(client.execute(request) { response ->
-                EntityUtils.consume(response.entity);
-                response.code
-            }).isEqualTo(HttpStatus.SC_OK)
+            val message = client.execute(request) { response ->
+                Message(response, EntityUtils.toString(response.entity))
+            }
+            Assertions.assertThat(message.head.code).isEqualTo(HttpStatus.SC_OK)
         }
     }
 
     @Test
-    fun testHttpBasicAuth() {
+    fun test_http_post_anything() {
+        for (method in setOf(Method.POST, Method.PUT)) {
+            val request = ClassicRequestBuilder.create(method.name)
+                .setHttpHost(httpbin)
+                .setPath("/anything")
+                .setEntity(StringEntity("some important message", ContentType.TEXT_PLAIN))
+                .build();
+            val message = client.execute(request) { response ->
+                Message(response, EntityUtils.toString(response.entity))
+            }
+            Assertions.assertThat(message.head.code).isEqualTo(HttpStatus.SC_OK)
+        }
+    }
+
+    @Test
+    fun test_dripping() {
+        val request = ClassicRequestBuilder.get()
+            .setHttpHost(httpbin)
+            .setPath("/drip")
+            .build();
+        val message = client.execute(request) { response ->
+            Message(response, EntityUtils.toString(response.entity))
+        }
+        Assertions.assertThat(message.head.code).isEqualTo(HttpStatus.SC_OK)
+    }
+
+    @Test
+    fun test_bytes() {
+        val request = ClassicRequestBuilder.get()
+            .setHttpHost(httpbin)
+            .setPath("/bytes/20000")
+            .build();
+        val message = client.execute(request) { response ->
+            Message(response, EntityUtils.toString(response.entity))
+        }
+        Assertions.assertThat(message.head.code).isEqualTo(HttpStatus.SC_OK)
+        Assertions.assertThat(message.body).hasSize(20000)
+    }
+
+    @Test
+    fun test_delay() {
+        for (method in setOf(Method.POST, Method.PUT)) {
+            val request = ClassicRequestBuilder.create(method.name)
+                .setHttpHost(httpbin)
+                .setPath("/delay/2")
+                .setEntity(StringEntity("some important message", ContentType.TEXT_PLAIN))
+                .build();
+            val message = client.execute(request) { response ->
+                Message(response, EntityUtils.toString(response.entity))
+            }
+            Assertions.assertThat(message.head.code).isEqualTo(HttpStatus.SC_OK)
+        }
+    }
+
+    @Test
+    fun test_basic_auth() {
         val credsProvider = BasicCredentialsProvider()
         credsProvider.setCredentials(
             AuthScope(httpbin),
@@ -85,18 +147,19 @@ class HttpClientIntegrationTest {
         val context = HttpClientContext.create()
         context.credentialsProvider = credsProvider
         for (i in 1..5) {
-            val request = ClassicRequestBuilder.get("/basic-auth/test-user/passwd")
+            val request = ClassicRequestBuilder.get()
                 .setHttpHost(httpbin)
+                .setPath("/basic-auth/test-user/passwd")
                 .build();
-            Assertions.assertThat(client.execute(request, context) { response ->
-                EntityUtils.consume(response.entity);
-                response.code
-            }).isEqualTo(HttpStatus.SC_OK)
+            val message = client.execute(request, context) { response ->
+                Message(response, EntityUtils.toString(response.entity))
+            }
+            Assertions.assertThat(message.head.code).isEqualTo(HttpStatus.SC_OK)
         }
     }
 
     @Test
-    fun testHttpDigestAuth() {
+    fun test_digest_auth() {
         val credsProvider = BasicCredentialsProvider()
         credsProvider.setCredentials(
             AuthScope(httpbin),
@@ -104,13 +167,14 @@ class HttpClientIntegrationTest {
         val context = HttpClientContext.create()
         context.credentialsProvider = credsProvider
         for (i in 1..5) {
-            val request = ClassicRequestBuilder.get("/digest-auth/auth/test-user/passwd")
+            val request = ClassicRequestBuilder.get()
                 .setHttpHost(httpbin)
+                .setPath("/digest-auth/auth/test-user/passwd")
                 .build();
-            Assertions.assertThat(client.execute(request, context) { response ->
-                EntityUtils.consume(response.entity);
-                response.code
-            }).isEqualTo(HttpStatus.SC_OK)
+            val message = client.execute(request, context) { response ->
+                Message(response, EntityUtils.toString(response.entity))
+            }
+            Assertions.assertThat(message.head.code).isEqualTo(HttpStatus.SC_OK)
         }
     }
 

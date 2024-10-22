@@ -16,9 +16,6 @@
 package com.ok2c.hc.android
 
 import android.support.test.runner.AndroidJUnit4
-import java.util.LinkedList
-import java.util.concurrent.Future
-import org.apache.hc.client5.http.async.methods.SimpleHttpResponse
 import org.apache.hc.client5.http.async.methods.SimpleResponseConsumer
 import org.apache.hc.client5.http.auth.AuthScope
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials
@@ -26,8 +23,10 @@ import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient
 import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider
 import org.apache.hc.client5.http.protocol.HttpClientContext
+import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.HttpHost
 import org.apache.hc.core5.http.HttpStatus
+import org.apache.hc.core5.http.Method
 import org.apache.hc.core5.http.nio.support.AsyncRequestBuilder
 import org.assertj.core.api.Assertions
 import org.junit.After
@@ -59,84 +58,123 @@ class HttpAsyncClientIntegrationTest {
     }
 
     @Test
-    fun testHttpGet() {
-        val responseQueue = LinkedList<Future<SimpleHttpResponse>>()
+    fun test_get() {
         for (i in 1..5) {
-            val request = AsyncRequestBuilder.get("/get")
+            val request = AsyncRequestBuilder.get()
                 .setHttpHost(httpbin)
+                .setPath("/get")
                 .build();
 
             val responseFuture = client.execute(request, SimpleResponseConsumer.create(), null);
-            responseQueue.add(responseFuture);
-        }
-        for (responseFuture in responseQueue) {
             val response = responseFuture.get()
             Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK);
         }
     }
 
     @Test
-    fun testHttpPost() {
-        val responseQueue = LinkedList<Future<SimpleHttpResponse>>()
+    fun test_post() {
         for (i in 1..5) {
-            val request = AsyncRequestBuilder.post("/post")
+            val request = AsyncRequestBuilder.post()
                 .setHttpHost(httpbin)
+                .setPath("/post")
                 .setEntity("stuff")
                 .build();
 
             val responseFuture = client.execute(request, SimpleResponseConsumer.create(), null);
-            responseQueue.add(responseFuture);
-        }
-        for (responseFuture in responseQueue) {
             val response = responseFuture.get()
             Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK)
         }
     }
 
     @Test
-    fun testHttpBasicAuth() {
-        val credsProvider = BasicCredentialsProvider()
-        credsProvider.setCredentials(
-            AuthScope(httpbin),
-            UsernamePasswordCredentials("test-user", "passwd".toCharArray()))
-
-        val responseQueue = LinkedList<Future<SimpleHttpResponse>>()
-        for (i in 1..5) {
-            val request = AsyncRequestBuilder.get("/basic-auth/test-user/passwd")
+    fun test_http_post_anything() {
+        for (method in setOf(Method.POST, Method.PUT)) {
+            val request = AsyncRequestBuilder.create(method.name)
                 .setHttpHost(httpbin)
+                .setPath("/anything")
+                .setEntity("some important message", ContentType.TEXT_PLAIN)
                 .build();
-
-            val context = HttpClientContext.create()
-            context.credentialsProvider = credsProvider
-            val responseFuture = client.execute(request, SimpleResponseConsumer.create(),  context,null);
-            responseQueue.add(responseFuture);
-        }
-        for (responseFuture in responseQueue) {
+            val responseFuture = client.execute(request, SimpleResponseConsumer.create(), null);
             val response = responseFuture.get()
             Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK)
         }
     }
 
     @Test
-    fun testHttpDigestAuth() {
+    fun test_dripping() {
+        val request = AsyncRequestBuilder.get()
+            .setHttpHost(httpbin)
+            .setPath("/drip")
+            .build();
+        val responseFuture = client.execute(request, SimpleResponseConsumer.create(), null);
+        val response = responseFuture.get()
+        Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK)
+    }
+
+    @Test
+    fun test_bytes() {
+        val request = AsyncRequestBuilder.get()
+            .setHttpHost(httpbin)
+            .setPath("/bytes/20000")
+            .build();
+        val responseFuture = client.execute(request, SimpleResponseConsumer.create(), null);
+        val response = responseFuture.get()
+        Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK)
+        Assertions.assertThat(response.bodyBytes).hasSize(20000)
+    }
+
+    @Test
+    fun test_delay() {
+        for (method in setOf(Method.POST, Method.PUT)) {
+            val request = AsyncRequestBuilder.create(method.name)
+                .setHttpHost(httpbin)
+                .setPath("/delay/2")
+                .setEntity("some important message", ContentType.TEXT_PLAIN)
+                .build();
+            val responseFuture = client.execute(request, SimpleResponseConsumer.create(), null);
+            val response = responseFuture.get()
+            Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK)
+        }
+    }
+
+    @Test
+    fun test_basic_auth() {
         val credsProvider = BasicCredentialsProvider()
         credsProvider.setCredentials(
             AuthScope(httpbin),
             UsernamePasswordCredentials("test-user", "passwd".toCharArray()))
 
-        val responseQueue = LinkedList<Future<SimpleHttpResponse>>()
         for (i in 1..5) {
-            val request = AsyncRequestBuilder.get("/digest-auth/auth/test-user/passwd")
+            val request = AsyncRequestBuilder.get()
                 .setHttpHost(httpbin)
+                .setPath("/basic-auth/test-user/passwd")
+                .build();
+
+            val context = HttpClientContext.create()
+            context.credentialsProvider = credsProvider
+            val responseFuture = client.execute(request, SimpleResponseConsumer.create(),  context,null);
+            val response = responseFuture.get()
+            Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK)
+        }
+    }
+
+    @Test
+    fun test_digest_auth() {
+        val credsProvider = BasicCredentialsProvider()
+        credsProvider.setCredentials(
+            AuthScope(httpbin),
+            UsernamePasswordCredentials("test-user", "passwd".toCharArray()))
+
+        for (i in 1..5) {
+            val request = AsyncRequestBuilder.get()
+                .setHttpHost(httpbin)
+                .setPath("/digest-auth/auth/test-user/passwd")
                 .build();
 
             val context = HttpClientContext.create()
             context.credentialsProvider = credsProvider
 
             val responseFuture = client.execute(request, SimpleResponseConsumer.create(),  context,null);
-            responseQueue.add(responseFuture);
-        }
-        for (responseFuture in responseQueue) {
             val response = responseFuture.get()
             Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK)
         }
