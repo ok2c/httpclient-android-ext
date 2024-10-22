@@ -31,11 +31,15 @@ import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * Make sure the integration test services are running
+ * by executing Docker Compose from <project_root>/docker/docker-compose.yml
+ */
 @RunWith(AndroidJUnit4::class)
 class HttpClientIntegrationTest {
 
     // HttpBin.org running in a docker container
-    val httpbin = HttpHost("172.19.0.2", 80)
+    val httpbin = HttpHost("172.20.0.2", 80)
 
     val client: CloseableHttpClient = HttpClientBuilder.create()
         .build();
