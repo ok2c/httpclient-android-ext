@@ -16,38 +16,41 @@
 package com.ok2c.hc.android
 
 import android.support.test.runner.AndroidJUnit4
+import org.apache.hc.client5.http.async.methods.SimpleResponseConsumer
 import org.apache.hc.client5.http.auth.AuthScope
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials
+import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient
+import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.client5.http.protocol.HttpClientContext
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.HttpHost
 import org.apache.hc.core5.http.HttpStatus
-import org.apache.hc.core5.http.Message
 import org.apache.hc.core5.http.Method
-import org.apache.hc.core5.http.io.entity.EntityUtils
-import org.apache.hc.core5.http.io.entity.StringEntity
-import org.apache.hc.core5.http.io.support.ClassicRequestBuilder
+import org.apache.hc.core5.http.nio.support.AsyncRequestBuilder
 import org.assertj.core.api.Assertions
 import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-
 
 /**
  * Make sure the integration test services are running
  * by executing Docker Compose from <project_root>/docker/docker-compose.yml
  */
 @RunWith(AndroidJUnit4::class)
-class HttpClientIntegrationTest {
+class AsyncHttpBinIntegrationTest {
 
     // HttpBin.org running in a docker container
     val httpbin = HttpHost("172.20.0.2", 80)
 
-    val client: CloseableHttpClient = HttpClientBuilder.create()
+    val client: CloseableHttpAsyncClient = HttpAsyncClientBuilder.create()
         .build();
+
+    @Before
+    fun startup() {
+        client.start()
+    }
 
     @After
     fun cleanup() {
@@ -57,84 +60,80 @@ class HttpClientIntegrationTest {
     @Test
     fun test_get() {
         for (i in 1..5) {
-            val request = ClassicRequestBuilder.get()
+            val request = AsyncRequestBuilder.get()
                 .setHttpHost(httpbin)
                 .setPath("/get")
                 .build();
-            val message = client.execute(request) { response ->
-                Message(response, EntityUtils.toString(response.entity))
-            }
-            Assertions.assertThat(message.head.code).isEqualTo(HttpStatus.SC_OK)
+
+            val responseFuture = client.execute(request, SimpleResponseConsumer.create(), null);
+            val response = responseFuture.get()
+            Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK);
         }
     }
 
     @Test
     fun test_post() {
         for (i in 1..5) {
-            val request = ClassicRequestBuilder.post()
+            val request = AsyncRequestBuilder.post()
                 .setHttpHost(httpbin)
                 .setPath("/post")
                 .setEntity("stuff")
                 .build();
-            val message = client.execute(request) { response ->
-                Message(response, EntityUtils.toString(response.entity))
-            }
-            Assertions.assertThat(message.head.code).isEqualTo(HttpStatus.SC_OK)
+
+            val responseFuture = client.execute(request, SimpleResponseConsumer.create(), null);
+            val response = responseFuture.get()
+            Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK)
         }
     }
 
     @Test
     fun test_http_post_anything() {
         for (method in setOf(Method.POST, Method.PUT)) {
-            val request = ClassicRequestBuilder.create(method.name)
+            val request = AsyncRequestBuilder.create(method.name)
                 .setHttpHost(httpbin)
                 .setPath("/anything")
-                .setEntity(StringEntity("some important message", ContentType.TEXT_PLAIN))
+                .setEntity("some important message", ContentType.TEXT_PLAIN)
                 .build();
-            val message = client.execute(request) { response ->
-                Message(response, EntityUtils.toString(response.entity))
-            }
-            Assertions.assertThat(message.head.code).isEqualTo(HttpStatus.SC_OK)
+            val responseFuture = client.execute(request, SimpleResponseConsumer.create(), null);
+            val response = responseFuture.get()
+            Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK)
         }
     }
 
     @Test
     fun test_dripping() {
-        val request = ClassicRequestBuilder.get()
+        val request = AsyncRequestBuilder.get()
             .setHttpHost(httpbin)
             .setPath("/drip")
             .build();
-        val message = client.execute(request) { response ->
-            Message(response, EntityUtils.toString(response.entity))
-        }
-        Assertions.assertThat(message.head.code).isEqualTo(HttpStatus.SC_OK)
+        val responseFuture = client.execute(request, SimpleResponseConsumer.create(), null);
+        val response = responseFuture.get()
+        Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK)
     }
 
     @Test
     fun test_bytes() {
-        val request = ClassicRequestBuilder.get()
+        val request = AsyncRequestBuilder.get()
             .setHttpHost(httpbin)
             .setPath("/bytes/20000")
             .build();
-        val message = client.execute(request) { response ->
-            Message(response, EntityUtils.toString(response.entity))
-        }
-        Assertions.assertThat(message.head.code).isEqualTo(HttpStatus.SC_OK)
-        Assertions.assertThat(message.body).hasSize(20000)
+        val responseFuture = client.execute(request, SimpleResponseConsumer.create(), null);
+        val response = responseFuture.get()
+        Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK)
+        Assertions.assertThat(response.bodyBytes).hasSize(20000)
     }
 
     @Test
     fun test_delay() {
         for (method in setOf(Method.POST, Method.PUT)) {
-            val request = ClassicRequestBuilder.create(method.name)
+            val request = AsyncRequestBuilder.create(method.name)
                 .setHttpHost(httpbin)
                 .setPath("/delay/2")
-                .setEntity(StringEntity("some important message", ContentType.TEXT_PLAIN))
+                .setEntity("some important message", ContentType.TEXT_PLAIN)
                 .build();
-            val message = client.execute(request) { response ->
-                Message(response, EntityUtils.toString(response.entity))
-            }
-            Assertions.assertThat(message.head.code).isEqualTo(HttpStatus.SC_OK)
+            val responseFuture = client.execute(request, SimpleResponseConsumer.create(), null);
+            val response = responseFuture.get()
+            Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK)
         }
     }
 
@@ -144,17 +143,18 @@ class HttpClientIntegrationTest {
         credsProvider.setCredentials(
             AuthScope(httpbin),
             UsernamePasswordCredentials("test-user", "passwd".toCharArray()))
-        val context = HttpClientContext.create()
-        context.credentialsProvider = credsProvider
+
         for (i in 1..5) {
-            val request = ClassicRequestBuilder.get()
+            val request = AsyncRequestBuilder.get()
                 .setHttpHost(httpbin)
                 .setPath("/basic-auth/test-user/passwd")
                 .build();
-            val message = client.execute(request, context) { response ->
-                Message(response, EntityUtils.toString(response.entity))
-            }
-            Assertions.assertThat(message.head.code).isEqualTo(HttpStatus.SC_OK)
+
+            val context = HttpClientContext.create()
+            context.credentialsProvider = credsProvider
+            val responseFuture = client.execute(request, SimpleResponseConsumer.create(),  context,null);
+            val response = responseFuture.get()
+            Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK)
         }
     }
 
@@ -164,17 +164,19 @@ class HttpClientIntegrationTest {
         credsProvider.setCredentials(
             AuthScope(httpbin),
             UsernamePasswordCredentials("test-user", "passwd".toCharArray()))
-        val context = HttpClientContext.create()
-        context.credentialsProvider = credsProvider
+
         for (i in 1..5) {
-            val request = ClassicRequestBuilder.get()
+            val request = AsyncRequestBuilder.get()
                 .setHttpHost(httpbin)
                 .setPath("/digest-auth/auth/test-user/passwd")
                 .build();
-            val message = client.execute(request, context) { response ->
-                Message(response, EntityUtils.toString(response.entity))
-            }
-            Assertions.assertThat(message.head.code).isEqualTo(HttpStatus.SC_OK)
+
+            val context = HttpClientContext.create()
+            context.credentialsProvider = credsProvider
+
+            val responseFuture = client.execute(request, SimpleResponseConsumer.create(),  context,null);
+            val response = responseFuture.get()
+            Assertions.assertThat(response.code).isEqualTo(HttpStatus.SC_OK)
         }
     }
 
