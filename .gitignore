@@ -10,3 +10,6 @@
 /captures
 .externalNativeBuild
 gradle.properties
+test-CA/serial.txt*
+test-CA/index.txt*
+test-CA/newcerts/

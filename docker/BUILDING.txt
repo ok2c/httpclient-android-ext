@@ -1,0 +1,31 @@
+= SSL key / cert material
+
+Execute in the project root
+
+* Issue a certificate request
+---
+openssl req -config test-CA/openssl.cnf -new -nodes -sha256 -days 36500  \
+  -subj '/O=OK2 Consulting GmbH/OU=HttpClient Android Extensions/CN=localhost/emailAddress=olegk@apache.org/' \
+-addext 'subjectAltName = DNS:localhost,IP:172.20.0.3' \
+ -keyout docker/httpd/server-key.pem \
+ -out docker/httpd/server-certreq.pem
+---
+
+* Verify the request
+---
+openssl req -in docker/server-certreq.pem -text -noout
+---
+
+* Sign new certificate with the test CA key
+---
+openssl ca -config test-CA/openssl.cnf -days 36500 \
+ -out docker/httpd/server-cert.pem \
+ -in docker/httpd/server-certreq.pem \
+ && rm docker/httpd/server-certreq.pem
+---
+
+* Create JKS store with the Test CA cert
+---
+keytool -import -trustcacerts -alias test-ca -file test-CA/ca-cert.pem -storetype PKCS12  -keystore httpclient-android/src/androidTest/resources/test-ca.p12 -storepass nopassword
+---
+

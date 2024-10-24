@@ -1,0 +1,25 @@
+# CA key and certificate for unit and integration tests
+
+* Create CA key
+
+---
+openssl genrsa -aes256 -out test-CA/ca-key.pem 4096
+---
+PEM pass phrase "nopassword"
+
+* Issue a certificate request
+---
+openssl req -config test-CA/openssl.cnf -x509 -new -nodes -key test-CA/ca-key.pem -sha256 -days 36500  \
+ -subj '/O=OK2 Consulting GmbH/OU=HttpClient Android Extensions/CN=Test CA/emailAddress=olegk@apache.org/' \
+ -out test-CA/ca-cert.pem
+---
+
+* Check the private key
+---
+openssl rsa -in test-CA/ca-key.pem -check -text -noout
+---
+
+* Print CA certificate details
+---
+openssl x509 -in test-CA/ca-cert.pem -text -noout
+---

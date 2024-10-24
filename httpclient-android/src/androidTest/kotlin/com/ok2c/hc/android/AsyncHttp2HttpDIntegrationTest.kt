@@ -15,7 +15,6 @@
  */
 package com.ok2c.hc.android
 
-import android.support.test.runner.AndroidJUnit4
 import java.util.Queue
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.CountDownLatch
@@ -34,16 +33,8 @@ import org.apache.hc.core5.http2.HttpVersionPolicy
 import org.assertj.core.api.Assertions
 import org.junit.Ignore
 import org.junit.Test
-import org.junit.runner.RunWith
 
-/**
- * Make sure the integration test services are running
- * by executing Docker Compose from <project_root>/docker/docker-compose.yml
- */
-@RunWith(AndroidJUnit4::class)
-class AsyncHttp2HttpDIntegrationTest: AbstractAsyncHttpDIntegrationTest(
-    HttpVersionPolicy.FORCE_HTTP_2,
-    HttpHost("172.20.0.3", 81))  {
+abstract class AsyncHttp2HttpDIntegrationTest(protocolPolicy: HttpVersionPolicy, target: HttpHost): AbstractAsyncHttpDIntegrationTest(protocolPolicy, target)  {
 
     @Test @Ignore
     fun test_request_execution_with_push() {

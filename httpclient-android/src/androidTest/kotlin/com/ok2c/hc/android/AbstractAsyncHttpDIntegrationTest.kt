@@ -26,12 +26,14 @@ import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient
 import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder
 import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder
 import org.apache.hc.client5.http.protocol.HttpClientContext
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy
 import org.apache.hc.core5.concurrent.FutureCallback
 import org.apache.hc.core5.http.HttpHost
 import org.apache.hc.core5.http.HttpStatus
 import org.apache.hc.core5.http.HttpVersion
 import org.apache.hc.core5.http2.HttpVersionPolicy
 import org.apache.hc.core5.http2.config.H2Config
+import org.apache.hc.core5.testing.SSLTestContexts
 import org.apache.hc.core5.util.Timeout
 import org.assertj.core.api.Assertions
 import org.junit.After
@@ -47,6 +49,7 @@ abstract class AbstractAsyncHttpDIntegrationTest(val protocolPolicy: HttpVersion
     }
 
     val connManager = PoolingAsyncClientConnectionManagerBuilder.create()
+        .setTlsStrategy(DefaultClientTlsStrategy(SSLTestContexts.createClientSSLContext()))
         .setDefaultTlsConfig(TlsConfig.custom()
             .setVersionPolicy(protocolPolicy)
             .build())
