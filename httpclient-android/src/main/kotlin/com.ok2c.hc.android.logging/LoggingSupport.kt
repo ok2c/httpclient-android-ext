@@ -66,7 +66,7 @@ internal class AndroidLogger(name: String) : MarkerIgnoringBase() {
         )
     }
 
-    fun logFormatted(priority: Int, format: String, vararg argArray: Any) {
+    fun logFormatted(priority: Int, format: String, vararg argArray: Any?) {
         if (isLoggable(priority)) {
             val ft = MessageFormatter.arrayFormat(format, argArray)
             log(priority, ft.message, ft.throwable)
@@ -91,7 +91,7 @@ internal class AndroidLogger(name: String) : MarkerIgnoringBase() {
         logFormatted(Log.VERBOSE, format, arg)
     }
 
-    override fun trace(format: String, arg1: Any, arg2: Any) {
+    override fun trace(format: String, arg1: Any, arg2: Any?) {
         logFormatted(Log.VERBOSE, format, arg1, arg2)
     }
 
@@ -115,7 +115,7 @@ internal class AndroidLogger(name: String) : MarkerIgnoringBase() {
         logFormatted(Log.DEBUG, format, arg)
     }
 
-    override fun debug(format: String, arg1: Any, arg2: Any) {
+    override fun debug(format: String, arg1: Any, arg2: Any?) {
         logFormatted(Log.DEBUG, format, arg1, arg2)
     }
 
@@ -139,7 +139,7 @@ internal class AndroidLogger(name: String) : MarkerIgnoringBase() {
         logFormatted(Log.INFO, format, arg)
     }
 
-    override fun info(format: String, arg1: Any, arg2: Any) {
+    override fun info(format: String, arg1: Any, arg2: Any?) {
         logFormatted(Log.INFO, format, arg1, arg2)
     }
 
@@ -163,7 +163,7 @@ internal class AndroidLogger(name: String) : MarkerIgnoringBase() {
         logFormatted(Log.WARN, format, arg)
     }
 
-    override fun warn(format: String, arg1: Any, arg2: Any) {
+    override fun warn(format: String, arg1: Any, arg2: Any?) {
         logFormatted(Log.WARN, format, arg1, arg2)
     }
 
@@ -187,7 +187,7 @@ internal class AndroidLogger(name: String) : MarkerIgnoringBase() {
         logFormatted(Log.ERROR, format, arg)
     }
 
-    override fun error(format: String, arg1: Any, arg2: Any) {
+    override fun error(format: String, arg1: Any, arg2: Any?) {
         logFormatted(Log.ERROR, format, arg1, arg2)
     }
 
