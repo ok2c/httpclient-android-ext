@@ -41,8 +41,6 @@ dependencies {
     val versions: Map<String, String> by project.extra
 
     api("org.apache.httpcomponents.client5:httpclient5:${versions["httpclient"]}")
-    api("org.apache.httpcomponents.core5:httpcore5:${versions["httpcore"]}")
-    api("org.apache.httpcomponents.core5:httpcore5-h2:${versions["httpcore"]}")
     androidTestImplementation("org.assertj:assertj-core:${versions["assertj"]}")
     androidTestImplementation("com.android.support.test:runner:1.0.2")
     androidTestImplementation("com.android.support.test.espresso:espresso-core:3.0.2")
@@ -64,9 +62,9 @@ tasks.register<Javadoc>("androidJavadocs") {
     stdOptions.links(
             "http://docs.oracle.com/javase/7/docs/api/",
             "http://developer.android.com/reference/",
-            "https://hc.apache.org/httpcomponents-core-5.1.x/current/httpcore5/apidocs/",
-            "https://hc.apache.org/httpcomponents-core-5.1.x/current/httpcore5-h2/apidocs/",
-            "https://hc.apache.org/httpcomponents-client-5.1.x/current/httpclient5/apidocs/")
+            "https://hc.apache.org/httpcomponents-core-5.3.x/current/httpcore5/apidocs/",
+            "https://hc.apache.org/httpcomponents-core-5.3.x/current/httpcore5-h2/apidocs/",
+            "https://hc.apache.org/httpcomponents-client-5.4.x/current/httpclient5/apidocs/")
 }
 
 tasks.register<Jar>("androidJavadocsJar") {

@@ -12,8 +12,7 @@ buildscript {
 }
 
 val versions = mapOf(
-        "httpclient" to "5.3.1",
-        "httpcore" to "5.2.5",
+        "httpclient" to "5.4.1",
         "assertj" to "3.26.3"
 )
 

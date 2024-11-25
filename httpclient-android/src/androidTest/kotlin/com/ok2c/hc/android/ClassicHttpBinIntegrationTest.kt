@@ -117,7 +117,7 @@ class ClassicHttpBinIntegrationTest {
             .setPath("/bytes/20000")
             .build();
         val message = client.execute(request) { response ->
-            Message(response, EntityUtils.toString(response.entity))
+            Message(response, EntityUtils.toByteArray(response.entity))
         }
         Assertions.assertThat(message.head.code).isEqualTo(HttpStatus.SC_OK)
         Assertions.assertThat(message.body).hasSize(20000)
