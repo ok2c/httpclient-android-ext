@@ -5,8 +5,7 @@ plugins {
 
 android {
     namespace = "com.ok2c.hc.android"
-
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 19
